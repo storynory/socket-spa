@@ -1,6 +1,8 @@
 <script>
+// @ts-nocheck
+
     import { formatFriendlyDate } from "$lib/utils/dateFormater.js";
-    import { pb,pblocation,imageresize  } from '$lib/pocketbase.svelte.js'; 
+    import { pb,pblocation,imageresize   } from '$lib/pocketbase.svelte.js'; 
     // Props passed to the component
     let { 
         title = '', 

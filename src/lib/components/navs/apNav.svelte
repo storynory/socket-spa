@@ -11,7 +11,7 @@
     import SocketIcon from "$lib/components/icons/socket.svelte"
     // Reactive state variables using runes API
     let showDropdown = $state(false); // Dropdown visibility state
-
+import {pb} from '$lib/pocketbase.svelte.js'
     // Reactive derived value for username
 
 let username =  "bertie"

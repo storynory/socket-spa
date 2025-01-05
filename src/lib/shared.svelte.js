@@ -1,6 +1,12 @@
-import { pb } from '$lib/pocketbase.svelte.js'
-export const userState = $state({
- 
-}
+const searchItems = {
+    query: "",
+    searchResults: [],
+    
+    
+    
+  };
   
-)
+  export const shared = $state({
+    searchItems
+  });
+  

@@ -1,6 +1,5 @@
 <script>
-      import { userState, logout } from '$lib/pocketbase.svelte.js';
-    let isOpen = $state(false);
+      let isOpen = $state(false);
 
     const toggleDrawer = () => {
         isOpen = !isOpen;

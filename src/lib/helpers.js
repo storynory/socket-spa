@@ -1,9 +1,16 @@
+// @ts-nocheck
 // Function to serialize non-plain-old JavaScript objects (non-POJOs)
+/**
+ * @param {any} obj
+ */
 function serializeNonPOJOs(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
 // Function to sanitise user input by escaping special HTML characters
+/**
+ * @param {string} input
+ */
 function sanitiseInput(input) {
     if (typeof input !== 'string') {
         throw new TypeError('Input must be a string');
@@ -17,10 +24,14 @@ function sanitiseInput(input) {
         "'": '&#39;',
     };
 
+    // @ts-ignore
     return input.replace(/[&<>"']/g, char => escapeMap[char]);
 }
 
 // Function to unescape sanitised input back to its original form
+/**
+ * @param {string} input
+ */
 function unescapeInput(input) {
     if (typeof input !== 'string') {
         throw new TypeError('Input must be a string');

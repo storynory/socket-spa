@@ -11,13 +11,15 @@
     async function login() {
         try {
             await pb.collection('users').authWithPassword(username, password);
-            console.log('valid');
+           
             goto('/socket/dashboard');
         } catch (err) {
-            console.log("could not login");
+          
             errorMessage = 'Invalid username or password. Please try again.'; // Set error message
         }
     }
+
+  
 </script>
 
 <form class='form' onsubmit={(e) => { e.preventDefault(); login(); }}>

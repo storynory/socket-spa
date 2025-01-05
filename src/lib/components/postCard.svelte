@@ -1,9 +1,8 @@
 <script>
-// @ts-nocheck
 
   import { imageresize  } from '$lib/images.js';   
   let { cardData } = $props();
-  console.log(cardData)
+
 
 </script>
 

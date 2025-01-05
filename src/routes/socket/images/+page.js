@@ -1,8 +1,7 @@
 
 import PocketBase from 'pocketbase';
-
- 
-   const pb = new PocketBase('https://content.socketcms.com');
+import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+const pb = new PocketBase(PUBLIC_POCKETBASE_URL);
 
 
 export async function load({  }) {
