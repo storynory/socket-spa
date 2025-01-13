@@ -141,7 +141,9 @@ label {
     box-shadow: 0 0 5px rgba(138, 79, 255, 0.2);
   }
 
- 
+  input::placeholder {
+    visibility: hidden;
+  }
 
 /* Buttons */
 
@@ -217,3 +219,4 @@ textarea {
     min-height: 100px;
     resize: vertical; /* Allow vertical resizing only */
 }
+

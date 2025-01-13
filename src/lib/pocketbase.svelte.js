@@ -11,8 +11,7 @@ export const pblocation = ('https://content.socketcms.com/api/files/');
 
 // Logout function: Clears the authentication store and resets the user state
 export function logout() {
-    pb.authStore.clear(); // Clear PocketBase's auth store
-   
+    pb.authStore.clear(); // Clear PocketBase's auth store 
 }
 
 

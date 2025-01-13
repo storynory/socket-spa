@@ -1,0 +1,9 @@
+{
+	"extends": "@sveltejs/tsconfig/kit",
+	"compilerOptions": {
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true
+	}
+}

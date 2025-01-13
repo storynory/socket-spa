@@ -1,4 +1,7 @@
 // src/lib/utils/slugify.js
+/**
+ * @param {string} text
+ */
 function slugify(text) {
     return text
       .trim()

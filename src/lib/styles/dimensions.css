@@ -1,7 +1,4 @@
-.page {
-    max-width: 2000px;
-margin:auto;
-}
+
 
 .story {
     max-width: 800px;
@@ -18,6 +15,7 @@ main {
     margin: auto;
 }
 
+.page,
 .page-width {
     max-width: 1200px;
     margin: auto;

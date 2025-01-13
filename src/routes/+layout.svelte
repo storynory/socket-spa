@@ -1,27 +1,41 @@
 <script>
     //import SideDrawer from '$lib/components/navs/SideDrawer.svelte';
     import Nav from '$lib/components/navs/apNav.svelte';
-    let { children } = $props();
+    import { fade, blur, } from 'svelte/transition';
+    import { cubicInOut, circInOut,  expoInOut } from 'svelte/easing';
+    let { children,data  } = $props();
     import "$lib/app.css";
     
-</script>
 
-<div class="layout ">
+</script>
+{#key data.pathname}
+<div class="layout" 
+
+>
+
+	
 
    
         <Nav />
 
-    <main class="container page-width">
+    <main class="container page-width "
+    in:fade={{ easing: circInOut, duration: 200, delay: 90 }}
+    out:fade={{ easing: circInOut, duration: 200 }}
+>
+  
+ 
         {@render children()}
     </main>
 </div>
-
+{/key}
 <style>
-  
+
+
     .layout {
         display: flex;
         flex-direction: column;
         height: 100%;
+        
     }
 
     main {

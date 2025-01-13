@@ -23,6 +23,7 @@
         alt={featuredImage.alt || alt || title || 'Image'} 
         width=300
         height=300
+         loading="lazy"
 
       />
     </a>
@@ -55,8 +56,8 @@
   background-color: #007BFF; /* Bright blue background */
   color: #ffffff; /* White text */
   text-decoration: none; /* Remove underline */
-  border-radius: 0.25rem; /* Rounded corners */
-  font-family: Arial, sans-serif; /* Clean, modern font */
+
+ 
   font-size: 1rem; /* Readable text size */
   font-weight: bold; /* Slightly bold for emphasis */
   transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */

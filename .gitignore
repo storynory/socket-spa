@@ -1,3 +1,4 @@
+# Node modules
 node_modules
 
 # Output
@@ -7,6 +8,20 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Coverage
+coverage/
+
+# Lock files (only keep one, if needed)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # OS
 .DS_Store
@@ -18,6 +33,15 @@ Thumbs.db
 !.env.example
 !.env.test
 
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Static files (if using adapter-static or custom outputs)
+static-generated/
