@@ -1,9 +1,7 @@
 {
-	"extends": "@sveltejs/tsconfig/kit",
+	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
 		"strict": true,
-		"noImplicitAny": true,
-		"strictNullChecks": true,
-		"strictFunctionTypes": true
+		"moduleResolution": "node"
 	}
 }

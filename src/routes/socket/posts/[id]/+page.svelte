@@ -8,14 +8,70 @@
 	import { pb, pblocation } from '$lib/pocketbase.svelte.js';
 	import { imageresize, imagesq } from '$lib/images.js';
 	import Gallery from '$lib/components/gallery.svelte';
+	import sanitizeHtml from 'sanitize-html';
+	import { onMount } from 'svelte';
+	import { Editor } from '@tiptap/core';
+	import StarterKit from '@tiptap/starter-kit';
+	import Link from '@tiptap/extension-link';
+	import Image from '@tiptap/extension-image';
 
-	let isHtmlMode = $state(false);
+	const cleanHtml = (dirtyHtml) => {
+		const sanitizedHtml = sanitizeHtml(dirtyHtml, {
+			allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+				'h1',
+				'h2',
+				'h3',
+				'h4',
+				'h5',
+				'h6', // Headings
+				'ul',
+				'ol',
+				'li', // Lists (unordered and ordered)
+				'img',
+				'table',
+				'thead',
+				'tbody',
+				'tr',
+				'td',
+				'th', // Images & Tables
+				'strong',
+				'em',
+				'u',
+				's',
+				'blockquote',
+				'pre' // Formatting tags
+			]),
+			allowedAttributes: {
+				...sanitizeHtml.defaults.allowedAttributes,
+				a: ['href', 'name', 'target', 'rel'], // Links
+				img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'], // Images
+				table: ['border'] // Optional table attributes
+			},
+			allowedSchemes: ['http', 'https', 'mailto', 'ftp'], // Allow only safe URL schemes
+			selfClosing: ['img', 'br', 'hr'], // Self-closing tags
+			allowedSchemesAppliedToAttributes: ['href', 'src'], // Ensure only safe URLs in href and src
+			allowProtocolRelative: true // Allow protocol-relative URLs (e.g., //example.com)
+		});
+
+		// Step 1: Remove empty paragraphs (with only <br> or whitespace/newlines)
+		let cleanedHtml = sanitizedHtml.replace(/<p>(\s|<br\s*\/?>)*<\/p>/g, '');
+
+		// Step 2: Remove <p> tags inside <li> and keep their inner content
+		cleanedHtml = cleanedHtml.replace(/<li>\s*<p>(.*?)<\/p>\s*<\/li>/g, '<li>$1</li>');
+
+		return cleanedHtml;
+	};
+	let html = $state('hideHtml');
+	let editQuill = $state('showQuill');
+
 	const toggleMode = () => {
-		if (isHtmlMode == false) {
-			isHtmlMode = true;
-		} else {
-			isHtmlMode = false;
+		if (html === 'showHtml') {
+			html = 'hideHtml';
+			editQuill = 'showQuill';
 			quill.root.innerHTML = pageState.contents;
+		} else {
+			html = 'showHtml';
+			editQuill = 'hideQuill';
 		}
 	};
 
@@ -24,7 +80,7 @@
 	let pageState = $state({
 		title: propsData.data.post.title,
 		collectionName: propsData.data.post.collectionName,
-		contents: propsData.data.post.contents,
+		contents: cleanHtml(propsData.data.post.contents),
 		excerpt: propsData.data.post.excerpt,
 		featuredImage: propsData.data.post.expand.featuredImage, // id of the FeaturedImage from the images
 		featuredImageId: propsData.data.post.featuredImage.id, // for saving the post
@@ -105,33 +161,38 @@
 		dialog.close();
 	};
 
-	let quillContainer;
-	let quill;
+	let editor;
 
-	// Initialize Quill editor
-	const initQuill = async () => {
-		const { default: Quill } = await import('quill');
-		quill = new Quill(quillContainer, {
-			...quillOptions,
-			modules: {
-				...quillOptions.modules,
-				toolbar: {
-					...quillOptions.modules.toolbar,
-					handlers: {
-						//image: () => openQuillImageModal() // Quill image picker
-					}
+	onMount(() => {
+		editor = new Editor({
+			element: document.querySelector('#editor'),
+			extensions: [StarterKit, Link.configure({ openOnClick: true }), Image],
+			content: pageState.contents,
+			onUpdate: ({ editor }) => {
+				pageState.contents = cleanHtml(editor.getHTML());
+			},
+			editorProps: {
+				attributes: {
+					class: 'proseEditor'
 				}
 			}
 		});
-		// this could be an initial prop
-		quill.root.innerHTML = pageState.contents;
 
-		// this could be a call back function
-		quill.on('text-change', () => {
-			pageState.contents = quill.root.innerHTML;
-		});
-	};
-	initQuill();
+		return () => editor.destroy();
+	});
+
+	// Function to handle link insertion
+	function addLink() {
+		const url = prompt('Enter the link URL');
+		if (url) {
+			editor.chain().focus().setLink({ href: url }).run();
+		}
+	}
+	$effect(() => {
+		if (editor && editor.getHTML() !== pageState.contents) {
+			editor.commands.setContent(pageState.contents);
+		}
+	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -147,17 +208,26 @@
 
 		<label for="quill-container">
 			<span class="ql">Contents:</span>
-			<div class="q">
-				<div
-					id="quill-container"
-					class="input"
-					bind:this={quillContainer}
-					tabindex="0"
-					role="textbox"
-					aria-multiline="true"
-				></div>
+
+			<div class={editQuill}>
+				<div class="toolbar">
+					<button onclick={() => editor.chain().focus().toggleBold().run()}
+						><strong>B</strong></button
+					>
+					<button onclick={() => editor.chain().focus().toggleItalic().run()}><em>I</em></button>
+
+					<button onclick={() => editor.chain().focus().toggleBulletList().run()}
+						>Bullet List</button
+					>
+					<button onclick={() => editor.chain().focus().toggleOrderedList().run()}
+						>Ordered List</button
+					>
+					<button onclick={addLink}>Link</button>
+				</div>
+				<div id="editor"></div>
 			</div>
-			<textarea bind:value={pageState.contents} class="input container"></textarea>
+
+			<textarea bind:value={pageState.contents} class="{html} container input"></textarea>
 		</label>
 		<button onclick={toggleMode}>html</button>
 
@@ -186,9 +256,22 @@
 </div>
 
 <style>
-	.q {
+	.showHtml {
+		display: block;
+		min-height: 400px;
+	}
+
+	.hideHtml {
+		display: none;
+	}
+
+	.showQuill {
+		display: block;
+	}
+
+	.hideQuill {
 		position: absolute;
-		left: 3000px;
+		left: -3000px;
 	}
 
 	.btn.full {
@@ -252,5 +335,38 @@ because the nesting selector cannot represent pseudo-elements. */
 		dialog[open]::backdrop {
 			background-color: rgb(0 0 0 / 0%);
 		}
+	}
+
+	#editor {
+		border: 1px solid #ccc;
+		padding: 10px;
+		min-height: 200px;
+	}
+
+	.toolbar {
+		display: flex;
+		gap: 8px;
+		margin-bottom: 10px;
+	}
+
+	.toolbar button {
+		padding: 5px 10px;
+		border: 1px solid #ccc;
+		background-color: #f9f9f9;
+		cursor: pointer;
+	}
+
+	.toolbar button.active {
+		background-color: #ddd;
+		font-weight: bold;
+	}
+
+	.proseEditor {
+		color: pink;
+	}
+
+	div.tiptap p {
+		margin: 1em 0;
+		color: red;
 	}
 </style>
