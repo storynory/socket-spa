@@ -1,22 +1,18 @@
-
-
 .story {
-    max-width: 800px;
+	max-width: 800px;
 }
 
 .container {
-width: 100%;
- position: relative;
+	width: 100%;
+	position: relative;
 }
 
-
-
 main {
-    margin: auto;
+	margin: auto;
 }
 
 .page,
 .page-width {
-    max-width: 1200px;
-    margin: auto;
+	max-width: 1200px;
+	margin: auto;
 }

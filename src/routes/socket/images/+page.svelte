@@ -1,16 +1,13 @@
 <script>
-    import PocketBase from 'pocketbase';
-    import { onMount } from 'svelte';
-       import SocketIcon from '$lib/components/icons/socket.svelte'
-   
-       let imagesData = $props(); 
-       let images = imagesData.data.items
+	import Gallery from '$lib/components/gallery.svelte';
 
-   
-   </script>
-   å 
-   
-   {#each images as image }
-   <h2>{image.title}</h2>
-   
-   {/each}
+	let imagesData = $props();
+	let images = imagesData.data.items;
+
+	let onImageSelect = (imageId) => {
+		// does nothing but gallery requires it.. might make that optional
+		return;
+	};
+</script>
+
+<Gallery gallery={images} {onImageSelect} />

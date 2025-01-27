@@ -1,43 +1,47 @@
-.j-bk-prime {
-    background-color: #007A5E;
+.bg-prime {
+	background-color: #007a5e;
+}
+
+.bg-secondary {
+	background-color: #6c757d; /* A neutral gray */
+}
+
+.bg-success {
+	background-color: #28a745; /* A vibrant green */
+}
+
+.bg-danger {
+	background-color: #dc3545; /* A strong red */
+}
+
+.bg-warning {
+	background-color: #ffc107; /* A warm yellow */
+}
+
+.bg-info {
+	background-color: #17a2b8; /* A soothing cyan */
+}
+
+.bg-light {
+	background-color: #f8f9fa; /* A light gray */
+}
+
+.bg-dark {
+	background-color: #333; /* A deep gray */
+}
+
+.bg-white {
+	background-color: #ffffff; /* Pure white */
+}
+
+.-bx-shadow {
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .icon.prime path {
-    fill: white;
+	fill: white;
 }
 
-.j-bk-white {
-    background-color: white;
-}
-
-.j-bk-second {
-        background-color:midnightblue;
-}
-
-.j-bk-neutral {
-    background-color: ivory;
-}
-
-.j-txt-white,
-.j-txt-white a {
-        color: ivory;
-}
-
-
-
-.j-txt-prime {
-        color:#007A5E; 
-}
-
-.j-txt-second {
-        color: midnightblue;
-}
-
-a {
-    color: inherit;
-}
-
-a:hover {
-     color: #FF6161;
-     background: yellow;
+.-txt-white {
+	color: ivory;
 }

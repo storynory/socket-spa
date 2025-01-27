@@ -1,0 +1,55 @@
+main {
+	width: 100%;
+	max-width: 1200px;
+	margin: auto;
+	position: relative;
+}
+
+article {
+	width: 100%;
+	max-width: 800px;
+	margin: auto;
+	background-color: ivory;
+	padding: 1em;
+}
+
+section {
+	/*padding: calc(var(--base-font-unit) * 1rem);same as line heigt*/
+	border: 1px solid gray;
+	border-radius: 8px;
+	margin: 1em;
+}
+
+aside {
+	padding: 1em;
+	border-radius: 8px;
+}
+
+header {
+	border-bottom: 1px solid gray;
+}
+
+figure {
+	width: 100%;
+	max-width: 800px;
+	margin: auto;
+	display: inline-block; /* Use inline-block to keep the figure centered without flexbox */
+	text-align: center; /* Ensures text inside figcaption is centered */
+}
+
+figure img {
+	display: block; /* Prevents inline spacing issues with images */
+	margin: 0 auto; /* Centers the image */
+}
+
+figcaption {
+	font-size: 0.9rem; /* Optional: Adjust the font size for the caption */
+	color: #333; /* Optional: Style the caption text */
+	font-weight: bold;
+	font-style: italic;
+	padding: 0.5em;
+}
+
+.-full {
+	width: 100%;
+}

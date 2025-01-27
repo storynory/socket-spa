@@ -1,5 +1,5 @@
-
 export const ssr = false;
-export const load = ({ url }) => {
-    return { pathname: url.pathname };
-  };
+
+export const load = ({ params }) => {
+	return { pathname: params.id }; // Use 'id' if your route is '/[id]/'
+};

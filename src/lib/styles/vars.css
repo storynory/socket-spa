@@ -1,5 +1,29 @@
-    :root {
-        --base-font-size: 1.125rem;
-        --base-line-size:  calc(var(--base-font-size) * 1.5);
-        --base-font-scale: 1.618;
-    }
+/* Aim is for harmonious page and easy implementation.  Don't even try to stay on baseline as that way be madness.
+font sizes are according to a scale. 
+Line height is unitless.
+Responsiveness and accessiblity controlled by percentage in html
+spacing is in ems to keep it proportionate
+pow needs to be boiled down by postcss ... or just use multiples. 
+*/
+
+:root {
+	/* Base font and line height settings */
+	--line-height-ratio: 1.5; /* Unitless line height for baseline grid */
+	--font-scale: 1.618; /* Golden ratio scale */
+	/* Root-relative font size, scalable */
+	--base-font-size: 1rem; /* Root font size dynamically set in the html element */
+
+	/* Modular scale settings */
+
+	/* Positive scales */
+	--scale-1: calc(var(--base-font-size) * pow(var(--font-scale), 1));
+	--scale-1-x: calc(var(--base-font-size) * 1.25);
+	--scale-1-5: calc(var(--base-font-size) * 1.5);
+	--scale-2: calc(var(--base-font-size) * pow(var(--font-scale), 2));
+	--scale-3: calc(var(--base-font-size) * pow(var(--font-scale), 3));
+	--scale-4: calc(var(--base-font-size) * pow(var(--font-scale), 4));
+
+	/* Sub scales for smaller fonts */
+	--scale-sub-1: calc(var(--scale-2) * 0.75);
+	--scale-sub-2: calc(var(--scale-1) * 0.75);
+}

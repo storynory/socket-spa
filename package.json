@@ -26,8 +26,10 @@
 	"dependencies": {
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@tiptap/core": "^2.11.2",
+		"@tiptap/extension-dropcursor": "^2.11.2",
 		"@tiptap/extension-image": "^2.11.2",
 		"@tiptap/extension-link": "^2.11.2",
+		"@tiptap/extension-typography": "^2.11.2",
 		"@tiptap/starter-kit": "^2.11.2",
 		"dompurify": "^3.2.3",
 		"fuse.js": "^7.0.0",

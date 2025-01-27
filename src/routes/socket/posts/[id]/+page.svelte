@@ -1,79 +1,17 @@
 <script>
 	// @ts-nocheck
-
+	import { setContext } from 'svelte';
+	import Toolbar from '$lib/components/editors/toolbar.svelte';
 	import { goto } from '$app/navigation';
 	import { slugify } from '$lib/utils/slugify.js';
 	import { page } from '$app/stores';
-	import { quillOptions } from '$lib/quillConfig.js';
 	import { pb, pblocation } from '$lib/pocketbase.svelte.js';
 	import { imageresize, imagesq } from '$lib/images.js';
 	import Gallery from '$lib/components/gallery.svelte';
-	import sanitizeHtml from 'sanitize-html';
-	import { onMount } from 'svelte';
-	import { Editor } from '@tiptap/core';
-	import StarterKit from '@tiptap/starter-kit';
-	import Link from '@tiptap/extension-link';
-	import Image from '@tiptap/extension-image';
+	import { cleanHtml } from '$lib/utils/domPurify.js';
+	import TipTapEditor from '$lib/components/editors/tiptap.svelte';
 
-	const cleanHtml = (dirtyHtml) => {
-		const sanitizedHtml = sanitizeHtml(dirtyHtml, {
-			allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-				'h1',
-				'h2',
-				'h3',
-				'h4',
-				'h5',
-				'h6', // Headings
-				'ul',
-				'ol',
-				'li', // Lists (unordered and ordered)
-				'img',
-				'table',
-				'thead',
-				'tbody',
-				'tr',
-				'td',
-				'th', // Images & Tables
-				'strong',
-				'em',
-				'u',
-				's',
-				'blockquote',
-				'pre' // Formatting tags
-			]),
-			allowedAttributes: {
-				...sanitizeHtml.defaults.allowedAttributes,
-				a: ['href', 'name', 'target', 'rel'], // Links
-				img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'], // Images
-				table: ['border'] // Optional table attributes
-			},
-			allowedSchemes: ['http', 'https', 'mailto', 'ftp'], // Allow only safe URL schemes
-			selfClosing: ['img', 'br', 'hr'], // Self-closing tags
-			allowedSchemesAppliedToAttributes: ['href', 'src'], // Ensure only safe URLs in href and src
-			allowProtocolRelative: true // Allow protocol-relative URLs (e.g., //example.com)
-		});
-
-		// Step 1: Remove empty paragraphs (with only <br> or whitespace/newlines)
-		let cleanedHtml = sanitizedHtml.replace(/<p>(\s|<br\s*\/?>)*<\/p>/g, '');
-
-		// Step 2: Remove <p> tags inside <li> and keep their inner content
-		cleanedHtml = cleanedHtml.replace(/<li>\s*<p>(.*?)<\/p>\s*<\/li>/g, '<li>$1</li>');
-
-		return cleanedHtml;
-	};
-	let html = $state('hideHtml');
-	let editQuill = $state('showQuill');
-
-	const toggleMode = () => {
-		if (html === 'showHtml') {
-			html = 'hideHtml';
-			editQuill = 'showQuill';
-			quill.root.innerHTML = pageState.contents;
-		} else {
-			html = 'showHtml';
-			editQuill = 'hideQuill';
-		}
-	};
+	/*******************/
 
 	let propsData = $props();
 	//$inspect(propsData)
@@ -91,7 +29,20 @@
 		message: ''
 	});
 
+	// Define methods for interacting with `pageState`
+	function updatePageState(updater) {
+		updater(pageState); // Allow passing a function to update `pageState`
+	}
+
+	function getPageState() {
+		return pageState; // Provide a read-only version of `pageState`
+	}
+
+	// Set the context with the state and methods
+	//setContext('pageState', { pageState, updatePageState, getPageState });
+
 	let images = propsData.data.images.items;
+	setContext('pageState', { pageState, updatePageState, getPageState, images });
 
 	const updateMessage = (message = '') => {
 		pageState.message = message;
@@ -103,7 +54,7 @@
 		saveData = {
 			title: pageState.title,
 			slug: pageState.slug,
-			contents: pageState.contents,
+			contents: cleanHtml(pageState.contents),
 			excerpt: pageState.excerpt,
 			featuredImage: pageState.featuredImageId
 		};
@@ -114,6 +65,8 @@
 		try {
 			if (pageState.id) {
 				await pb.collection('posts').update(pageState.id, savePost());
+				pageState.contents = saveData.contents;
+
 				updateMessage('Post Updated');
 			} else {
 				const createdPost = await pb.collection('posts').create(savePost());
@@ -152,84 +105,50 @@
 	// I need a function to get the featured image and update pageState
 	// in SSR this would run on server but has to run in browser here
 
-	const saveFeaturedImage = async (imageId) => {
+	const saveFeaturedImage = async (imageData) => {
 		// pass this function into the Gallery Component
-		pageState.featuredImageId = imageId;
-		const image = await pb.collection('images').getOne(imageId, {});
+		pageState.featuredImageId = imageData.id;
+		const image = await pb.collection('images').getOne(imageData.id, {});
 		pageState.featuredImage = image;
 		console.log('image saved', image);
 		dialog.close();
 	};
 
-	let editor;
-
-	onMount(() => {
-		editor = new Editor({
-			element: document.querySelector('#editor'),
-			extensions: [StarterKit, Link.configure({ openOnClick: true }), Image],
-			content: pageState.contents,
-			onUpdate: ({ editor }) => {
-				pageState.contents = cleanHtml(editor.getHTML());
-			},
-			editorProps: {
-				attributes: {
-					class: 'proseEditor'
-				}
-			}
-		});
-
-		return () => editor.destroy();
-	});
-
-	// Function to handle link insertion
-	function addLink() {
-		const url = prompt('Enter the link URL');
-		if (url) {
-			editor.chain().focus().setLink({ href: url }).run();
-		}
+	function handleContentUpdate(updatedContent) {
+		pageState.contents = updatedContent; // Update pageState when content changes
 	}
-	$effect(() => {
-		if (editor && editor.getHTML() !== pageState.contents) {
-			editor.commands.setContent(pageState.contents);
-		}
-	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
-<div class="container page">
+
+<div class="container">
 	<form
-		class="form"
+		class="form editForm -p"
 		onsubmit={(e) => {
 			e.preventDefault();
 			updatePage();
 		}}
 	>
-		<input class="input h1" bind:value={pageState.title} placeholder="New Post Title" />
+		<div id="editorContainer" class="placeholder contentEditor -p">
+			<input
+				id="postTitle"
+				class="h1 container"
+				bind:value={pageState.title}
+				placeholder="New Post Title"
+				aria-label="Post Title"
+			/>
 
-		<label for="quill-container">
-			<span class="ql">Contents:</span>
+			<TipTapEditor
+				initialContent={pageState.contents}
+				onContentUpdate={handleContentUpdate}
+				{images}
+			/>
+		</div>
 
-			<div class={editQuill}>
-				<div class="toolbar">
-					<button onclick={() => editor.chain().focus().toggleBold().run()}
-						><strong>B</strong></button
-					>
-					<button onclick={() => editor.chain().focus().toggleItalic().run()}><em>I</em></button>
-
-					<button onclick={() => editor.chain().focus().toggleBulletList().run()}
-						>Bullet List</button
-					>
-					<button onclick={() => editor.chain().focus().toggleOrderedList().run()}
-						>Ordered List</button
-					>
-					<button onclick={addLink}>Link</button>
-				</div>
-				<div id="editor"></div>
-			</div>
-
-			<textarea bind:value={pageState.contents} class="{html} container input"></textarea>
-		</label>
-		<button onclick={toggleMode}>html</button>
+		<div class="-m-y">
+			<textarea bind:value={pageState.contents} class=" container input"></textarea>
+		</div>
+		<button>html</button>
 
 		<textarea class="input -m-y" bind:value={pageState.excerpt}> </textarea>
 
@@ -237,7 +156,7 @@
 
 		<button type="submit" class="btn save">Save Post</button>
 
-		{#if pageState.featuredImage.id}
+		{#if pageState.featuredImage?.id}
 			<figure class="figure -m-y">
 				<img
 					src="{imagesq}/300/{pageState.featuredImage.id}/{pageState.featuredImage.image}"
@@ -248,30 +167,18 @@
 
 		<dialog class="dialog page" bind:this={dialog}>
 			<button class="btn" onclick={closeModal}>Close</button>
-			<Gallery gallery={images} SaveImageCallback={saveFeaturedImage} />
+			<Gallery gallery={images} onImageSelect={saveFeaturedImage} />
 		</dialog>
 
-		<button class="btn full" onclick={openModal}> Set Featured Image </button>
+		<button class="btn full" onclick={openModal}>Set Featured Image</button>
 	</form>
+	<Toolbar />
 </div>
 
 <style>
-	.showHtml {
-		display: block;
-		min-height: 400px;
-	}
-
-	.hideHtml {
-		display: none;
-	}
-
-	.showQuill {
-		display: block;
-	}
-
-	.hideQuill {
-		position: absolute;
-		left: -3000px;
+	.contentEditor {
+		position: relative;
+		width: 100%;
 	}
 
 	.btn.full {
@@ -335,38 +242,5 @@ because the nesting selector cannot represent pseudo-elements. */
 		dialog[open]::backdrop {
 			background-color: rgb(0 0 0 / 0%);
 		}
-	}
-
-	#editor {
-		border: 1px solid #ccc;
-		padding: 10px;
-		min-height: 200px;
-	}
-
-	.toolbar {
-		display: flex;
-		gap: 8px;
-		margin-bottom: 10px;
-	}
-
-	.toolbar button {
-		padding: 5px 10px;
-		border: 1px solid #ccc;
-		background-color: #f9f9f9;
-		cursor: pointer;
-	}
-
-	.toolbar button.active {
-		background-color: #ddd;
-		font-weight: bold;
-	}
-
-	.proseEditor {
-		color: pink;
-	}
-
-	div.tiptap p {
-		margin: 1em 0;
-		color: red;
 	}
 </style>

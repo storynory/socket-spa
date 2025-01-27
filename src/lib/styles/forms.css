@@ -1,0 +1,24 @@
+/* Checkbox and radio inputs */
+input[type='checkbox'],
+input[type='radio'] {
+	margin-right: 0.5rem;
+	accent-color: #007bff; /* Modern browsers support this */
+	border: 1px solid #007bff;
+}
+
+/* Textarea specific styles */
+
+form,
+fieldset,
+textarea,
+.input {
+	width: 100%;
+	margin: auto;
+	padding: 0;
+}
+
+input,
+form {
+	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+	position: relative;
+}

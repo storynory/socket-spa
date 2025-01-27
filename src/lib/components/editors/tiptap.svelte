@@ -1,75 +1,79 @@
 <script>
-  import { onMount } from 'svelte';
-  import { Editor } from '@tiptap/core';
-  import StarterKit from '@tiptap/starter-kit';
-  import Link from '@tiptap/extension-link';
-  import Image from '@tiptap/extension-image';
+	import { onMount } from 'svelte';
+	import { Editor } from '@tiptap/core';
+	import StarterKit from '@tiptap/starter-kit';
+	import Link from '@tiptap/extension-link';
+	import Image from '@tiptap/extension-image';
+	import { getContext } from 'svelte';
+	import { sharedEditor } from './shared.svelte.js';
 
-  let { content = '<p>Start writing here...</p>' } = $props(); // Destructure props with default content
-  let editor;
+	import Typography from '@tiptap/extension-typography';
+	import { FigureNode, FigcaptionNode } from '$lib/components/editors/figureNode';
 
-  // Initialize the editor on mount
-  onMount(() => {
-    editor = new Editor({
-      element: document.querySelector('#editor'),
-      extensions: [
-        StarterKit,
-        Link.configure({ openOnClick: true }),
-        Image,
-      ],
-      content,
-      onUpdate: ({ editor }) => {
-        content = editor.getHTML(); // Update content on change
-      },
-    });
+	let { initialContent = '', onContentUpdate, images } = $props();
 
-    return () => editor.destroy(); // Clean up on unmount
-  });
+	// Get the context
+	const { pageState, updatePageState } = getContext('pageState');
+	let editor = $state();
+
+	function updateContents(newContents) {
+		updatePageState((state) => {
+			state.contents = newContents; // Update the `contents`
+			state.updated = new Date().toISOString(); // Automatically update timestamp
+		});
+	}
+
+	let element = $state();
+
+	onMount(() => {
+		editor = new Editor({
+			editorProps: {
+				attributes: {
+					class: 'r'
+				}
+			},
+			element: element,
+			extensions: [
+				StarterKit /*   
+Blockquote
+BulletList
+CodeBlock
+Document
+HardBreak
+Heading
+HorizontalRule
+ListItem
+OrderedList
+Paragraph
+Text   */,
+				Typography,
+				FigureNode,
+				FigcaptionNode,
+				Link.configure({ openOnClick: true }),
+				Image
+			],
+
+			content: initialContent,
+			onUpdate: ({ editor }) => {
+				const updatedContent = editor.getHTML();
+				onContentUpdate?.(updatedContent); // Trigger the callback
+			}
+		});
+		sharedEditor.editor = editor;
+		return () => editor.destroy();
+	});
+
+	// Effect to sync external content changes with the editor
+	$effect(() => {
+		if (editor && editor.getHTML() !== initialContent) {
+			editor.commands.setContent(initialContent);
+		}
+	});
 </script>
 
-<!-- Toolbar -->
-<div class="toolbar">
-  <button onclick={() => editor.chain().focus().toggleBold().run()}>Bold</button>
-  <button onclick={() => editor.chain().focus().toggleItalic().run()}>Italic</button>
-  <button onclick={() => editor.chain().focus().toggleBulletList().run()}>Bullet List</button>
-  <button onclick={() => editor.chain().focus().toggleOrderedList().run()}>Ordered List</button>
-</div>
-
-<!-- Editor Container -->
-<div id="editor" class="ProseMirror"></div>
+<article class="container">
+	<div id="editor" class="editor -p-lg" bind:this={element}></div>
+</article>
 
 <style>
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .toolbar button {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    cursor: pointer;
-  }
-
-  .toolbar button:hover {
-    background-color: #eee;
-  }
-
-  .toolbar button:active {
-    background-color: #ddd;
-  }
-
-  .ProseMirror {
-    border: 1px solid #ccc;
-    padding: 10px;
-    min-height: 200px;
-    outline: none;
-    transition: border-color 0.2s ease-in-out;
-  }
-
-  .ProseMirror:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  }
 </style>
